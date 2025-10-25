@@ -52,9 +52,10 @@ FIRST(C) => {e,c}
 1. FIRST(x) = {x} where x is any terminal
 2. FIRST(e) = {e}
 3. if A => Ba then add FIRST(B) - {e} to first(A) - because A can never start with e as it must always have a
-4. if A => B0,B1,...Bi,Bi+1..., Bk and e is in FIRST(B0) and e in FIRST of B(1).... and e in FIRST(Bi) then add FIRST(Bi+1) - {e} for FIRST (A) - i is any target point after B0 - if you observe e is in all the sets then do the rule. Basically if you are making all the B = e then add the first what ever one that does not have e to the set of FIRST(A)
-5. if A => B0,B1,...Bi,Bi+1..., Bk and e in FIRST(B1)... ect... then add e to FIRST(A). AKA if all the B's have e then you can add e to FIRST(A)
-
+4. if A => B0,B1,...Bi,Bi+1..., Bk and e is in FIRST(B0) and e in FIRST of B(1).... and e in FIRST(Bi) then add FIRST(Bi+1) - {e} for FIRST (A) - i is any target point after B0 - if you observe e is in all the sets then do the rule. Basically if you are making all the B = e then.
+5. add the first what ever one that does not have e to the set of FIRST(A)
+6. if A => B0,B1,...Bi,Bi+1..., Bk and e in FIRST(B1)... ect... then add e to FIRST(A). AKA if all the B's have e then you can add e to FIRST(A)
+![[Pasted image 20251025135415.png]]
 ### Example
 S => ABCD
 A=> CD | aA
@@ -115,6 +116,7 @@ First calculate first sets, then initialize empty follow sets for all non termin
 3. If B => alpha AC0...Ck and e in FIRST(C0) and e in FIRST(C1).... and e in FIRST(CK) add follow(B) to FOLLOW(A). this basically the same rules as rule 2
 4. If B => alphaAC0...Ck then add FIRST(C0) - e to FOLLOW(A).
 5. IF B => alphaAC0...CiCi+1...Ck and e in first of any C. then add FIRST(Ci+1) -e to FOLLOW(A)
+![[Pasted image 20251025142341.png]]
 ## Example
 S => ABCD
 A => CD | aA
