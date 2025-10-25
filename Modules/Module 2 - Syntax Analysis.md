@@ -48,7 +48,7 @@ FIRST(S) =>FIRST(A) U FIRST(B) U FIRST(B) => {a,b,c,e}
 FIRST(A) => {a}
 FIRST(B) => {b}
 FIRST(C) => {e,c}
-## Calculating First
+## Rules
 1. FIRST(x) = {x} where x is any terminal
 2. FIRST(e) = {e}
 3. if A => Ba then add FIRST(B) - {e} to first(A) - because A can never start with e as it must always have a
@@ -99,3 +99,128 @@ Steps:
 - Sets have changed so we redo the rules
 - because only FIRST(S) changed, no other changes will be done
 # Follow Sets
+Follow(A) where A is a non-terminal, returns the set of terminals and eof that can appear immediately after the non-terminal A. cannot have e.
+S => A | B | C
+A=> a
+B => Bb | b
+C => Cc | e
+FOLLOW(S) = {$}
+FOLLOW(A) = {$} the only way to get A is from S and since you can only follow with eof it also has eof
+FOLLOW(B) = {$, b} B can be arrived from S and B
+FOLLOW(C) = {$, c} similar to follow(B)
+## Rules
+First calculate first sets, then initialize empty follow sets for all non terminals. Finnaly apply the following rules
+1. If is the starting symbol of the grammar, then add $ to FOLLOW(S)
+2. If B => aA then add FOLLOW(B) to FOLLOW(A). what ever follows B will follow A
+3. If B => alpha AC0...Ck and e in FIRST(C0) and e in FIRST(C1).... and e in FIRST(CK) add follow(B) to FOLLOW(A). this basically the same rules as rule 2
+4. If B => alphaAC0...Ck then add FIRST(C0) - e to FOLLOW(A).
+5. IF B => alphaAC0...CiCi+1...Ck and e in first of any C. then add FIRST(Ci+1) -e to FOLLOW(A)
+## Example
+S => ABCD
+A => CD | aA
+B => b
+C => cC |e
+D => dD | e
+FIRST(S) => a,c,d,b
+FIRST(A) => a,c,d,e
+FIRST(B) => b
+FIRST(C) => e,c
+FIRST(D) => e,d
+
+| RULE      | Round 1 | Round 2 | Round 3 | Round 4 |
+| --------- | ------- | ------- | ------- | ------- |
+| FOLLOW(S) | {$}     | {$}     |         |         |
+| FOLLOW(A) | {b}     | {b}     |         |         |
+| FOLLOW(B) | {$c,d}  | {$c,d}  |         |         |
+| FOLLOW(C) | {$,d,b} | {$,d,b} |         |         |
+| FOLLOW(D) | {$,d}   | {$,d}   |         |         |
+Steps:
+- S is starting symbol so it gets eof
+- Rule 4 applies FOLLOW(A) so that first(B) is added to FIRST(A) from the prod rule FOLLOW(S)
+- Rule two applies to FOLLOW(A), the follow of A has the follow of A, but it doesn't change anything
+- Rule 3 applies to S=>ABCD as e is in FIRST(C) and FIRST(D) so FOLLOW(S) is added to FOLLOW(B)
+- Rule 4 applies S=>ABCD to add FIRST(C) to FIRST(B)
+- Rule 5 applies S=>ABCD to add FIRST(D) to FIRST(B)
+- Rule 3 applies to FOLLOW(C) so add FOLLOW(S) to FOLLOW(S)
+- Rule 4 applies to FOLLOW(C) so add first(D) to FOLLOW(C)
+- Rule 3 applies to FOLLOW(C) as A=>CD and so you add FOLLOW(A) to FOLLOW(C) as whatever comes after A must also come after C since D can be e 
+- Rule 2 applies to follow of D from S=>ABCD
+- Rule 2 applies to FOLLOW(D) FROM A=>CD
+- Round 2
+- No additional changes from round one to two. so everything is completed.
+# Predictive Recursive Descent Parsers
+At each parsing step ther is only one grammar rule that can be chosen and there is no need for back tracking
+The conditions for a predictive parser are both of the following:
+- if A=> alpha and A => Beta then FIRST(alpha) intersect FIRST(Beta) = null. There should be no first that two different rules can generate.
+- If e in FIRST(A) then FIRST(A) intersect FOLLOW(A) = null. If this rule is broken, you are never known if you are done parsing a.
+# Creating a Predictive Recursive Descent Parser
+- Create a CFG
+- Calculate FIRST AND FOLLOW
+- Prove that CFG allows Predictive Recursive Descent Parser
+- Write the predictive recursive decent parser using the first and follow sets
+![[Pasted image 20251023201144.png]]
+-----
+See example rules for bellow
+`
+Parse_S(){
+	t = get token();
+	if(t in first(ABCD)){
+		ungettoken();
+		parse_A();
+		parse_B();
+		parse_C();
+		parse_D();
+		print(s->ABCD)
+	}
+	else if (t in follow(s)){
+		print(eof);
+	}
+	else{
+		print(syntax error)
+	}
+}
+parse_a(){
+	t = gettoken()
+	if(t in first(cd)){
+		ungettoken();
+		parse_c()
+		parse_d()
+		print("A->CD")
+	}
+	else if(t in FIRST(aA)){
+		parse_A()
+		print(A->aA)
+	}
+	else if(t in follow(A)){--
+		ungettoken()
+		print(A=>E)
+	}
+	else{
+		print syntax error
+	}
+}
+parse_b(){
+	t = gettoken()
+	if(t in first(b)){
+	print(B=>b)
+	}
+	else{
+		print(syntax error)
+	}
+}
+parse_c(){
+	t=gettoken()
+	if(t in first(cC)){
+		parse_c()
+		print(cC)
+	}
+	else if(t in follow(c))
+	{
+		ungettoken()
+		print(c=>e)
+	}
+	else{
+		print(syntax error)
+	}
+}
+`
